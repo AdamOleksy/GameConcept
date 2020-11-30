@@ -16,14 +16,30 @@ public:
 	// Sets default values for this component's properties
 	UEnemyAI();
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere)
 	AActor* WayPoint;
+
+	UPROPERTY(EditAnywhere)
+	AActor* SecoundWayPoint;
+
+	UFUNCTION(BlueprintCallable)
+	void PawnReachWayPoint();
+
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY(EditAnywhere)
+	float RotationSpeed{1.f};
+
+	UPROPERTY(EditAnywhere)
+	float MovementSpeed{500.f};
+
+	void MoveToWaypoint(float DeltaTime);
+
 };

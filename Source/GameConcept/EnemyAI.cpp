@@ -2,7 +2,9 @@
 
 
 #include "GameFramework/Actor.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Math/Quat.h"
 #include "EnemyAI.h"
 
 // Sets default values for this component's properties
@@ -21,12 +23,6 @@ void UEnemyAI::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (WayPoint)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("I have waypoint in location %s"), *WayPoint->GetTransform().ToString());
-	}
-
-	
 	// ...
 	
 }
@@ -37,18 +33,33 @@ void UEnemyAI::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	MoveToWaypoint(DeltaTime);
+	// ...
+}
+
+void UEnemyAI::MoveToWaypoint(float DeltaTime)
+{
+	if(WayPoint)
+	{
 		FRotator LookAtDirectiron = UKismetMathLibrary::FindLookAtRotation
 		(
 			GetOwner()->GetActorLocation(), 
 			WayPoint->GetActorLocation()
 		);
 
-		LookAtDirectiron.Yaw = FMath::FInterpTo(GetOwner()->GetActorRotation().Yaw, LookAtDirectiron.Yaw, DeltaTime, 0.01f);
-		UE_LOG(LogTemp, Warning, TEXT("Target direction %f"), LookAtDirectiron.Yaw);
-		GetOwner()->SetActorRotation({0.f, LookAtDirectiron.Yaw, 0.f});
+		FRotator NewRotation = FMath::RInterpTo(GetOwner()->GetActorRotation(), LookAtDirectiron, DeltaTime, RotationSpeed);
+		GetOwner()->SetActorRotation({0.f, NewRotation.Yaw, 0.f});
 
 		
+		FVector ActorLocation = GetOwner()->GetActorLocation();
+		ActorLocation += (GetOwner()->GetActorForwardVector() * DeltaTime * MovementSpeed);
+		GetOwner()->SetActorLocation(ActorLocation);
+	}
 
-	// ...
 }
 
+
+void UEnemyAI::PawnReachWayPoint()
+{
+	UE_LOG(LogTemp, Error, TEXT("Dotarlem do punktu %s"), *GetOwner()->GetName());
+}
